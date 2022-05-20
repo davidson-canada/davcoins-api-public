@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,11 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Iterable<Product>> getAllProducts(){
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Iterable<Product>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize){
+        return new ResponseEntity<>(productService.getProductPage(pageNumber, pageSize), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
