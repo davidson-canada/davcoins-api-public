@@ -64,19 +64,19 @@ public class TransactionController {
         transactions.forEach( transaction -> {
             ObjectNode transactionJsonNode = new ObjectMapper().createObjectNode();
 
-            transactionJsonNode.put("transaction_id", transaction.getId());
+            transactionJsonNode.put("transactionId", transaction.getId());
             String fromUserUUID = transaction.getFromUser().toString();
-            transactionJsonNode.put("from_user_uuid", fromUserUUID);
+            transactionJsonNode.put("fromUserUuid", fromUserUUID);
             String fromUserName = notionUsersMap.get(fromUserUUID) == null ? "< DELETED USER >" : notionUsersMap.get(fromUserUUID).getName();
-            transactionJsonNode.put("from_user_name", fromUserName);
+            transactionJsonNode.put("fromUserName", fromUserName);
             String toUserUUID = transaction.getToUser().toString();
-            transactionJsonNode.put("to_user_uuid", toUserUUID);
+            transactionJsonNode.put("toUserUuid", toUserUUID);
             String toUserName = notionUsersMap.get(toUserUUID) == null ? "< DELETED USER >" : notionUsersMap.get(toUserUUID).getName();
-            transactionJsonNode.put("to_user_name", toUserName);
-            transactionJsonNode.put("transaction_amount", transaction.getAmount());
-            transactionJsonNode.put("transaction_date", transaction.getTransactionDate().toString());
-            transactionJsonNode.put("transaction_description", transaction.getTransactionDescription());
-            transactionJsonNode.put("transaction_reason", transaction.getTransactionReason());
+            transactionJsonNode.put("toUserName", toUserName);
+            transactionJsonNode.putPOJO("product", transaction.getProduct());
+            transactionJsonNode.put("transactionAmount", transaction.getTransactionAmount());
+            transactionJsonNode.put("transactionDate", transaction.getTransactionDate().toString());
+            transactionJsonNode.put("transactionDescription", transaction.getTransactionDescription());
 
             transactionJsonNodeList.add(transactionJsonNode);
         });
