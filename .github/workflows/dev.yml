@@ -29,7 +29,7 @@ jobs:
           echo "::set-output name=staging::${{ env.STAGING }}"
           echo ${{ github.event_name}} et ${{ github.ref_name}}
   
-  Test: # TODO On peut ajouter sonar ici ou le garder dans un workflow différent pour le déclencher d'une manière différente
+  Test: 
     name: Test
     runs-on: ubuntu-latest
     needs: Setup

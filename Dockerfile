@@ -2,10 +2,10 @@
 # Build stage
 #
 FROM maven:3.8.5-openjdk-17-slim AS build
-ARG staging=dev
+ARG type_deploy
 COPY src /home/app/src
 COPY pom.xml /home/app
-RUN mvn --quiet -P $staging -f /home/app/pom.xml clean package -DskipTests
+RUN mvn --quiet -P $type_deploy -f /home/app/pom.xml clean package -DskipTests
 
 #
 # Package stage
