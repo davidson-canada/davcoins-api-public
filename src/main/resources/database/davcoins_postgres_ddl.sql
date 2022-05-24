@@ -30,7 +30,7 @@ CREATE TABLE transactions (
     id serial primary key,
     from_user UUID NOT NULL,
     to_user UUID NOT NULL,
-    product_id serial NOT NULL,
+    product_id integer,
     product_quantity integer NOT NULL CHECK (product_quantity > 0),
     transaction_amount numeric(1000, 2) NOT NULL CHECK (transaction_amount > 0),
     transaction_date Timestamp NOT NULL DEFAULT NOW(),
@@ -44,4 +44,5 @@ CREATE TABLE transactions (
     constraint product_id
         FOREIGN KEY(product_id)
             REFERENCES products(id)
+            ON DELETE SET NULL
 );
