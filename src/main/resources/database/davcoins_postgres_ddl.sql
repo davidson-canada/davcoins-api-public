@@ -15,22 +15,6 @@ CREATE TABLE user_balance (
 --Create bank user.
 INSERT INTO user_balance VALUES ('00000000-0000-0000-0000-000000000000', 0);
 
-CREATE TABLE transactions (
-    id serial primary key,
-    from_user UUID NOT NULL,
-    to_user UUID NOT NULL,
-    amount numeric(1000, 2) NOT NULL CHECK (amount > 0),
-    transaction_date Timestamp NOT NULL DEFAULT NOW(),
-    transaction_description text NOT NULL DEFAULT '',
-    transaction_reason text NOT NULL DEFAULT '',
-    constraint from_uuid
-        FOREIGN KEY(from_user)
-            REFERENCES user_balance(notion_user),
-    constraint to_uuid
-        FOREIGN KEY(to_user)
-            REFERENCES user_balance(notion_user)
-);
-
 CREATE TABLE products (
     id serial primary key,
     name text NOT NULL CHECK (name <> ''),
@@ -41,3 +25,23 @@ CREATE TABLE products (
 );
 
 INSERT INTO products (name, description, price) VALUES('Retrait', 'Retrait', 0);
+
+CREATE TABLE transactions (
+    id serial primary key,
+    from_user UUID NOT NULL,
+    to_user UUID NOT NULL,
+    product_id serial NOT NULL,
+    product_quantity integer NOT NULL CHECK (product_quantity > 0),
+    transaction_amount numeric(1000, 2) NOT NULL CHECK (transaction_amount > 0),
+    transaction_date Timestamp NOT NULL DEFAULT NOW(),
+    transaction_description text NOT NULL DEFAULT '',
+    constraint from_uuid
+        FOREIGN KEY(from_user)
+            REFERENCES user_balance(notion_user),
+    constraint to_uuid
+        FOREIGN KEY(to_user)
+            REFERENCES user_balance(notion_user),
+    constraint product_id
+        FOREIGN KEY(product_id)
+            REFERENCES products(id)
+);
