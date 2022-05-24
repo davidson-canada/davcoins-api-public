@@ -10,6 +10,8 @@ import com.davidson.davcoinsapi.exception.UserNotFoundException;
 import com.davidson.davcoinsapi.model.Transaction;
 import com.davidson.davcoinsapi.repository.TransactionRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,10 @@ public class TransactionService {
 
     public Iterable<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
+    }
+
+    public Page<Transaction> getTransactionPage(final int pageNumber, final int pageSize) {
+        return transactionRepository.findAllByOrderByTransactionDateDesc(PageRequest.of(pageNumber-1, pageSize));
     }
 
     public List<Transaction> getAllMostRecentTransactions() {

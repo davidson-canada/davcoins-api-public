@@ -8,6 +8,8 @@ import com.davidson.davcoinsapi.model.Product;
 import com.davidson.davcoinsapi.repository.ProductRepository;
 import com.davidson.davcoinsapi.validation.ProductValidator;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,15 @@ public class ProductService {
     private final ProductValidator productValidator;
 
     public Iterable<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findAllByOrderByNameAsc();
+    }
+
+    public Page<Product> getProductPage(final int pageNumber, final int pageSize) {
+        return productRepository.findAllByOrderByNameAsc(PageRequest.of(pageNumber-1, pageSize));
+    }
+
+    public Page<Product> getProductSearchPage(final int pageNumber, final int pageSize, String query) {
+        return productRepository.findAllByNameIgnoreCaseContainingOrderByNameAsc(query, PageRequest.of(pageNumber-1, pageSize));
     }
 
     public Product getProductById(final long id) throws ProductNotFoundException {

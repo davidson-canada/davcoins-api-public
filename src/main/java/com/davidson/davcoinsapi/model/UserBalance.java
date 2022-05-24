@@ -16,6 +16,7 @@ import lombok.Data;
 public class UserBalance {
     
     @Id
+    @Column(name = "notion_user", columnDefinition = "UUID")
     private UUID id;
 
     @Column(columnDefinition = "numeric(1000, 2) NOT NULL CHECK (amount >= 0) DEFAULT 0")

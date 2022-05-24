@@ -4,6 +4,7 @@ import com.davidson.davcoinsapi.dto.ProductDTO;
 import com.davidson.davcoinsapi.model.Product;
 import com.davidson.davcoinsapi.service.ProductService;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,16 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Iterable<Product>> getAllProducts(){
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<Product>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize){
+        return new ResponseEntity<>(productService.getProductPage(pageNumber, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Product>> getProductSearchPage(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam String query){
+        return new ResponseEntity<>(productService.getProductSearchPage(pageNumber, pageSize, query), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
