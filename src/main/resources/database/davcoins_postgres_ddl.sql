@@ -25,6 +25,7 @@ CREATE TABLE products (
 );
 
 INSERT INTO products (name, description, price) VALUES('Retrait', 'Retrait', 0);
+INSERT INTO products (name, description, price) VALUES('Ajout', 'Ajout', 0);
 
 CREATE TABLE transactions (
     id serial primary key,
