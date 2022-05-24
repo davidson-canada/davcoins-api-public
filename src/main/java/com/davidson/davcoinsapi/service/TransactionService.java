@@ -43,11 +43,11 @@ public class TransactionService {
             validateTransaction(transaction);
 
             if (transaction.getFromUser().equals(bankUserUUID)) {
-                userBalanceService.changeUserBalance(transaction.getToUser(), transaction.getAmount());
+                userBalanceService.changeUserBalance(transaction.getToUser(), transaction.getTransactionAmount());
             } else {
-                userBalanceService.changeUserBalance(transaction.getFromUser(), transaction.getAmount().negate());
+                userBalanceService.changeUserBalance(transaction.getFromUser(), transaction.getTransactionAmount().negate());
                 if (!transaction.getToUser().equals(bankUserUUID)) {
-                    userBalanceService.changeUserBalance(transaction.getToUser(), transaction.getAmount());
+                    userBalanceService.changeUserBalance(transaction.getToUser(), transaction.getTransactionAmount());
                 }
             }
 
@@ -82,10 +82,18 @@ public class TransactionService {
         if (transaction.getToUser().equals(transaction.getFromUser())) {
             validationErrorMessage.append("To and from user are the same. ");
         }
-        if (transaction.getAmount() == null) {
-            validationErrorMessage.append("Missing amount. ");
-        } else if (transaction.getAmount().compareTo(BigDecimal.ZERO) < 1) {
-            validationErrorMessage.append("Amount must be greater than 0. ");
+        if (transaction.getProduct() == null) {
+            validationErrorMessage.append("Missing product. ");
+        } 
+        if (transaction.getTransactionAmount() == null) {
+            validationErrorMessage.append("Missing transaction amount. ");
+        } else if (transaction.getTransactionAmount().compareTo(BigDecimal.ZERO) < 1) {
+            validationErrorMessage.append("Transaction amount must be greater than 0. ");
+        }
+        if (transaction.getProductQuantity() == null) {
+            validationErrorMessage.append("Missing product quantity. ");
+        } else if (transaction.getProductQuantity().compareTo(BigDecimal.ZERO) < 1) {
+            validationErrorMessage.append("Product quantity must be greater than 0. ");
         }
 
         if (!validationErrorMessage.toString().isBlank()) {
