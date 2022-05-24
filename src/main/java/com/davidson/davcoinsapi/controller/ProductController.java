@@ -4,6 +4,7 @@ import com.davidson.davcoinsapi.dto.ProductDTO;
 import com.davidson.davcoinsapi.model.Product;
 import com.davidson.davcoinsapi.service.ProductService;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,8 +41,13 @@ public class ProductController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Iterable<Product>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize){
+    public ResponseEntity<Page<Product>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize){
         return new ResponseEntity<>(productService.getProductPage(pageNumber, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Product>> getProductSearchPage(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam String query){
+        return new ResponseEntity<>(productService.getProductSearchPage(pageNumber, pageSize, query), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

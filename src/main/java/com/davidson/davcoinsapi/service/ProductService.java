@@ -30,6 +30,10 @@ public class ProductService {
         return productRepository.findAllByOrderByNameAsc(PageRequest.of(pageNumber-1, pageSize));
     }
 
+    public Page<Product> getProductSearchPage(final int pageNumber, final int pageSize, String query) {
+        return productRepository.findAllByNameContainingOrderByNameAsc(query, PageRequest.of(pageNumber-1, pageSize));
+    }
+
     public Product getProductById(final long id) throws ProductNotFoundException {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found."));
