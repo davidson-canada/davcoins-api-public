@@ -31,7 +31,7 @@ public class ProductService {
     }
 
     public Page<Product> getProductSearchPage(final int pageNumber, final int pageSize, String query) {
-        return productRepository.findAllByNameContainingOrderByNameAsc(query, PageRequest.of(pageNumber-1, pageSize));
+        return productRepository.findAllByNameIgnoreCaseContainingOrderByNameAsc(query, PageRequest.of(pageNumber-1, pageSize));
     }
 
     public Product getProductById(final long id) throws ProductNotFoundException {
