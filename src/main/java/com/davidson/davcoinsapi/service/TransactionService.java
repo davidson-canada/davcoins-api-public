@@ -92,8 +92,8 @@ public class TransactionService {
         }
         if (transaction.getProductQuantity() == null) {
             validationErrorMessage.append("Missing product quantity. ");
-        } else if (transaction.getProductQuantity().compareTo(BigDecimal.ZERO) < 1) {
-            validationErrorMessage.append("Product quantity must be greater than 0. ");
+        } else if (transaction.getProductQuantity().compareTo(BigDecimal.ZERO) < 0) {
+            validationErrorMessage.append("Product quantity cannot be negative. ");
         }
 
         if (!validationErrorMessage.toString().isBlank()) {
