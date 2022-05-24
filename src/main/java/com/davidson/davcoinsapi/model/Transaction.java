@@ -45,7 +45,4 @@ public class Transaction {
     @Column(name = "transaction_description", columnDefinition = "text NOT NULL DEFAULT ''")
     private String transactionDescription = "";
 
-    @Column(name = "transaction_reason", columnDefinition = "text NOT NULL DEFAULT ''")
-    private String transactionReason = "";
-
 }
