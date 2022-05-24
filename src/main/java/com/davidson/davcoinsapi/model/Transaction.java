@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -27,8 +29,15 @@ public class Transaction {
     @Column(name = "to_user", columnDefinition = "UUID NOT NULL")
     private UUID toUser;
 
-    @Column(columnDefinition = "numeric(1000, 2) NOT NULL CHECK (amount > 0)")
-    private BigDecimal amount;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @Column(name = "product_quantity", columnDefinition = "integer NOT NULL CHECK (product_quantity > 0)")
+    private BigDecimal productQuantity;
+
+    @Column(name = "transaction_amount", columnDefinition = "numeric(1000, 2) NOT NULL CHECK (transaction_amount > 0)")
+    private BigDecimal transactionAmount;
 
     @Column(name = "transaction_date", columnDefinition = "Timestamp NOT NULL DEFAULT NOW()")
     private Timestamp transactionDate = new Timestamp(System.currentTimeMillis());
