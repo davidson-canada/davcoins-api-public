@@ -1,4 +1,4 @@
-package com.davidson.davcoinsapi.repository;
+package com.davidson.davcoinsapi.service;
 
 import java.util.Map;
 
@@ -8,15 +8,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-@Repository
+@Service
 @RequiredArgsConstructor
-public class NotionRepository {
+public class NotionService {
 
     private final AppConfigurationProperties props;
     
