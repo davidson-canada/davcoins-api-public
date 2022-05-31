@@ -2,6 +2,7 @@ package com.davidson.davcoinsapi.service;
 
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,9 @@ import java.util.UUID;
 
 import com.davidson.davcoinsapi.config.AppConfigurationProperties;
 import com.davidson.davcoinsapi.model.NotionUser;
-import com.davidson.davcoinsapi.repository.NotionRepository;
+import com.davidson.davcoinsapi.repository.NotionUserRepositoryImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -25,8 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import reactor.core.publisher.Mono;
-
 @ExtendWith(MockitoExtension.class)
 public class NotionUserServiceTest {
 
@@ -34,7 +31,7 @@ public class NotionUserServiceTest {
     private AppConfigurationProperties props;
 
     @Mock
-    private NotionRepository notionRepository;
+    private NotionUserRepositoryImpl notionUserRepositoryImpl;
 
     private NotionUserService notionUserService;
 
@@ -42,63 +39,68 @@ public class NotionUserServiceTest {
 
     private final UUID bankUserUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    private JsonNode validPage;
-
-    private JsonNode validDatabase;
+    private List<NotionUser> notionUsers;
 
     private NotionUser validTestNotionUser;
 
+    private Map<String, String> bo;
+
+    private Map<String, String> notion;
+
     @BeforeEach
     void init() throws JsonMappingException, JsonProcessingException{
-        notionUserService = new NotionUserService(props, notionRepository);
+        notionUserService = new NotionUserService(props, notionUserRepositoryImpl);
         
         validTestNotionUser = new NotionUser();
         validTestNotionUser.setId(validTestUUID);
         validTestNotionUser.setName("Test");
-        
-        String validPageJson = "{\"id\":\"" + validTestNotionUser.getId() + "\", \"properties\": { \"Nom\" : { \"title\" : [{ \"plain_text\": \"" + validTestNotionUser.getName() + "\" }]}}}";
-        
-        ObjectMapper objectMapper = new ObjectMapper();
-        validPage = objectMapper.readTree(validPageJson);
-        validDatabase = objectMapper.readTree("{\"results\": [" + validPageJson + "]}");
+
+        notionUsers = new ArrayList<>();
+        notionUsers.add(validTestNotionUser);
+
+        bo = new HashMap<>();
+        bo.put("bank_user_uuid", bankUserUUID.toString());
+
+        notion = new HashMap<>();
+        notion.put("database_id", "test");
     }
 
     @Test
     void getNotionUserByUUID_validId_returnsNotionUserAsOptional(){
-        when(notionRepository.getPageById(validTestUUID.toString())).thenReturn(Mono.just(validPage));
+        when(notionUserRepositoryImpl.findById(validTestUUID)).thenReturn(Optional.of(validTestNotionUser));
 
         Optional<NotionUser> notionUserOptional = notionUserService.getNotionUserByUUID(validTestUUID);
 
         assertThat(notionUserOptional).isPresent().contains(validTestNotionUser);
 
-        verify(notionRepository, times(1)).getPageById(validTestUUID.toString());
+        verify(notionUserRepositoryImpl, times(1)).findById(validTestUUID);
     }
 
     @Test
     void getNotionUserByUUID_nullId_returnsEmptyOptional(){
+        when(notionUserRepositoryImpl.findById(null)).thenReturn(Optional.empty());
+
         Optional<NotionUser> notionUserOptional = notionUserService.getNotionUserByUUID(null);
 
         assertThat(notionUserOptional).isEmpty();
+
+        verify(notionUserRepositoryImpl, times(1)).findById(null);
     }
 
     @Test
     void notionUserExists_validId_returnsTrue(){
-        Map<String, String> bo = new HashMap<>();
-        bo.put("bank_user_uuid", bankUserUUID.toString());
-
         when(props.getBo()).thenReturn(bo);
-        when(notionRepository.getPageById(validTestUUID.toString())).thenReturn(Mono.just(validPage));
+        when(notionUserRepositoryImpl.findById(validTestUUID)).thenReturn(Optional.of(validTestNotionUser));
 
         boolean userExists = notionUserService.notionUserExists(validTestUUID);
 
         assertThat(userExists).isTrue();
+
+        verify(notionUserRepositoryImpl, times(1)).findById(validTestUUID);
     }
 
     @Test
     void notionUserExists_bankUserId_returnsTrue(){
-        Map<String, String> bo = new HashMap<>();
-        bo.put("bank_user_uuid", bankUserUUID.toString());
-        
         when(props.getBo()).thenReturn(bo);
 
         boolean userExists = notionUserService.notionUserExists(bankUserUUID);
@@ -115,11 +117,7 @@ public class NotionUserServiceTest {
 
     @Test
     void getNotionUsersAsMap_returnsMap(){
-        Map<String, String> notion = new HashMap<>();
-        notion.put("database_id", "test");
-
-        when(props.getNotion()).thenReturn(notion);
-        when(notionRepository.queryDatabaseGetAllById(notion.get("database_id"))).thenReturn(Mono.just(validDatabase));
+        when(notionUserRepositoryImpl.findAll()).thenReturn(notionUsers);
 
         Map<String, NotionUser> userMap = notionUserService.getNotionUsersAsMap();
 
@@ -128,11 +126,7 @@ public class NotionUserServiceTest {
 
     @Test
     void getNotionUsersList_returnsList(){
-        Map<String, String> notion = new HashMap<>();
-        notion.put("database_id", "test");
-
-        when(props.getNotion()).thenReturn(notion);
-        when(notionRepository.queryDatabaseGetAllById(notion.get("database_id"))).thenReturn(Mono.just(validDatabase));
+        when(notionUserRepositoryImpl.findAll()).thenReturn(notionUsers);
 
         List<NotionUser> userList = notionUserService.getNotionUsersList();
 
