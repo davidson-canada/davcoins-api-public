@@ -1,5 +1,6 @@
 package com.davidson.davcoinsapi.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -18,8 +19,10 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "transactions")
-public class Transaction {
+public class Transaction implements Serializable {
     
+    private static final long serialVersionUID = -1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

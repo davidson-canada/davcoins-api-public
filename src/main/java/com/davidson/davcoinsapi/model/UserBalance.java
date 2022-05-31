@@ -1,5 +1,6 @@
 package com.davidson.davcoinsapi.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -13,8 +14,10 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "user_balance")
-public class UserBalance {
+public class UserBalance implements Serializable {
     
+    private static final long serialVersionUID = -1L;
+
     @Id
     @Column(name = "notion_user", columnDefinition = "UUID")
     private UUID id;
