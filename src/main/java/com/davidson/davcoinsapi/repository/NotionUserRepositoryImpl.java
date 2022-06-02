@@ -9,6 +9,8 @@ import com.davidson.davcoinsapi.config.AppConfigurationProperties;
 import com.davidson.davcoinsapi.model.NotionUser;
 import com.davidson.davcoinsapi.service.NotionService;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.springframework.stereotype.Repository;
 
@@ -47,7 +49,11 @@ public class NotionUserRepositoryImpl implements NotionUserRepository {
     public List<NotionUser> findAll() {
         String databaseId = props.getNotion().get(DATABASE_ID_STRING);
 
-        JsonNode result = notionService.queryDatabaseGetAllById(databaseId).block();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode query = mapper.createObjectNode();
+        query.set("sorts", mapper.createArrayNode().add(mapper.createObjectNode().put("property", "Nom").put("direction", "ascending")));
+
+        JsonNode result = notionService.queryDatabaseById(databaseId, query).block();
 
         List<NotionUser> userList = new ArrayList<>();
 
