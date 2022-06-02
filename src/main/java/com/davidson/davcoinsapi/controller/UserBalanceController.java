@@ -1,8 +1,11 @@
 package com.davidson.davcoinsapi.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.davidson.davcoinsapi.dto.UserBalanceDTO;
 import com.davidson.davcoinsapi.exception.NotionAPIException;
 import com.davidson.davcoinsapi.model.NotionUser;
 import com.davidson.davcoinsapi.model.UserBalance;
@@ -34,30 +37,29 @@ public class UserBalanceController {
     private final UserBalanceService userBalanceService;
 
     @GetMapping
-    public ResponseEntity<List<JsonNode>> getAllUserBalances() {
+    public ResponseEntity<List<UserBalanceDTO>> getAllUserBalances() {
 
         List<NotionUser> notionUsers = notionUserService.getNotionUsersList();
 
-        List<JsonNode> userInfoObjects = new ArrayList<>();
+        List<UserBalanceDTO> userBalanceDTOs = new ArrayList<>();
 
-        notionUsers.iterator().forEachRemaining(notionUser -> {
-            ObjectNode userInfo = new ObjectMapper().createObjectNode();
+        for(NotionUser notionUser : notionUsers){
+            UserBalanceDTO userBalanceDTO = new UserBalanceDTO();
 
-            try {
-                UserBalance userBalance = userBalanceService.getUserBalance(notionUser.getId()).get();
-                userInfo.put("id", notionUser.getId().toString());
-                userInfo.put("name", notionUser.getName());
-                userInfo.put("balance", userBalance.getBalance().toString());
-                userInfoObjects.add(userInfo);
-            } catch (IllegalArgumentException illegalArgumentException){
-                String errorMessage = String.format("Invalid id for Notion user: name: %s, id: %s", notionUser.getName(), notionUser.getId());
-                logger.error(errorMessage);
-            } catch (NotionAPIException notionAPIException){
-                logger.error(notionAPIException.getMessage());
+            userBalanceDTO.setNotionUser(notionUser);
+
+            Optional<UserBalance> userBalanceOptional = userBalanceService.getUserBalance(notionUser.getId());
+            if(userBalanceOptional.isPresent()){
+                userBalanceDTO.setBalance(userBalanceOptional.get().getBalance());
+            } else {
+                userBalanceDTO.setBalance(BigDecimal.ZERO);
             }
-        });
 
-        return new ResponseEntity<>(userInfoObjects,
+            userBalanceDTOs.add(userBalanceDTO);
+        }
+
+        return new ResponseEntity<>(userBalanceDTOs,
                 HttpStatus.OK);
     }
+
 }

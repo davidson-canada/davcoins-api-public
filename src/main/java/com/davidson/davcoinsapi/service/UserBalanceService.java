@@ -26,27 +26,13 @@ public class UserBalanceService {
     private final UserBalanceValidator userBalanceValidator;
 
     /**
-     * Retrieves the user's balance from the database.
-     * <p>
-     * If the user balance is not found, it checks if the user exists in Notion. 
-     * If the user exists in Notion, it returns a user balance with the default balance of 0.
+     * Retrieves the user's balance from the database.=
      * 
      * @param id the id of the user.
-     * @return an optional containing the user balance, or an empty optional if the user doesn't exist.
-     * @throws IllegalArgumentException if the id is null.
-     * @throws NotionAPIException if there is an error connecting to the API.
+     * @return an optional containing the user balance, or an empty optional if the user balance doesn't exist.
      */
-    public Optional<UserBalance> getUserBalance(final UUID id) throws IllegalArgumentException, NotionAPIException {
-        Optional<UserBalance> userBalanceOptional = userBalanceRepository.findById(id);
-
-        if(userBalanceOptional.isEmpty() && notionUserService.notionUserExists(id)){
-            UserBalance userBalance = new UserBalance();
-            userBalance.setId(id);
-            userBalance.setBalance(BigDecimal.ZERO.setScale(2));
-            userBalanceOptional = Optional.of(userBalance);
-        }
-
-        return userBalanceOptional;
+    public Optional<UserBalance> getUserBalance(final UUID id) {
+        return id == null ? Optional.empty() : userBalanceRepository.findById(id);
     }
 
     /**
