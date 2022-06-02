@@ -10,9 +10,6 @@ import com.davidson.davcoinsapi.model.NotionUser;
 import com.davidson.davcoinsapi.model.Transaction;
 import com.davidson.davcoinsapi.service.NotionUserService;
 import com.davidson.davcoinsapi.service.TransactionService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
