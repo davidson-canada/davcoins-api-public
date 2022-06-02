@@ -6,17 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.davidson.davcoinsapi.dto.UserBalanceDTO;
-import com.davidson.davcoinsapi.exception.NotionAPIException;
 import com.davidson.davcoinsapi.model.NotionUser;
 import com.davidson.davcoinsapi.model.UserBalance;
 import com.davidson.davcoinsapi.service.NotionUserService;
 import com.davidson.davcoinsapi.service.UserBalanceService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/user-balances")
 @RequiredArgsConstructor
 public class UserBalanceController {
-
-    private final Logger logger = LoggerFactory.getLogger(UserBalanceController.class);
 
     private final NotionUserService notionUserService;
 

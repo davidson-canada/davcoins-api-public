@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.davidson.davcoinsapi.exception.NotionAPIException;
 import com.davidson.davcoinsapi.exception.UserBalanceException;
 import com.davidson.davcoinsapi.exception.UserNotFoundException;
 import com.davidson.davcoinsapi.model.UserBalance;
