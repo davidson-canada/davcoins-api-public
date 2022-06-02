@@ -1,6 +1,7 @@
 package com.davidson.davcoinsapi.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,17 +29,14 @@ public class TransactionService {
     private final UserBalanceService userBalanceService;
 
     @Transactional
-    public Transaction[] createTransactions(Transaction[] transactions)
+    public List<Transaction> createTransactions(List<Transaction> transactions)
             throws InvalidTransactionException, UserBalanceException, UserNotFoundException {
 
-        int numTransactions = transactions.length;
-
-        Transaction[] newTransactions = new Transaction[numTransactions];
+        List<Transaction> newTransactions = new ArrayList<>();
 
         UUID bankUserUUID = notionUserService.getBankUser().getId();
 
-        for (int i = 0; i < numTransactions; i++) {
-            Transaction transaction = transactions[i];
+        for (Transaction transaction : transactions) {
 
             validateTransaction(transaction);
 
@@ -51,7 +49,7 @@ public class TransactionService {
                 }
             }
 
-            newTransactions[i] = transactionRepository.save(transaction);
+            newTransactions.add(transactionRepository.save(transaction));
         }
 
         return newTransactions;

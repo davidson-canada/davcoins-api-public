@@ -3,7 +3,9 @@ package com.davidson.davcoinsapi.config;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.Data;
@@ -20,4 +22,9 @@ public class AppConfigurationProperties implements Serializable {
     private Map<String, String> bo;
 
     private Map<String, String> notion;
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 }

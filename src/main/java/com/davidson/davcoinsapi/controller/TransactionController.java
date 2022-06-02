@@ -3,7 +3,9 @@ package com.davidson.davcoinsapi.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import com.davidson.davcoinsapi.dto.TransactionDTO;
 import com.davidson.davcoinsapi.model.NotionUser;
 import com.davidson.davcoinsapi.model.Transaction;
 import com.davidson.davcoinsapi.service.NotionUserService;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
@@ -31,57 +34,84 @@ import lombok.RequiredArgsConstructor;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    
+
     private final NotionUserService notionUserService;
 
-    @PostMapping("/create")
-    public ResponseEntity<Transaction[]> createTransactions(@RequestBody Transaction[] transactions){
-        Transaction[] newTransactions = transactionService.createTransactions(transactions);
+    private final ModelMapper modelMapper;
 
-        return new ResponseEntity<>(newTransactions, HttpStatus.OK);
+    private static final String DELETED_NOTION_USER_NAME = "< DELETED USER >";
+
+    @PostMapping("/create")
+    public ResponseEntity<List<TransactionDTO>> createTransactions(@RequestBody List<TransactionDTO> transactionDTOs) {
+        List<Transaction> newTransactions = transactionService.createTransactions(convertToEntities(transactionDTOs));
+
+        return new ResponseEntity<>(convertToDTOs(newTransactions), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<JsonNode>> getTransactions(){
-        return new ResponseEntity<>(getTransactionsWithUserNames(transactionService.getAllMostRecentTransactions()), HttpStatus.OK);
+    public ResponseEntity<List<TransactionDTO>> getTransactions() {
+        return new ResponseEntity<>(convertToDTOs(transactionService.getAllMostRecentTransactions()),
+                HttpStatus.OK);
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Page<JsonNode>> getTransactionPage(@RequestParam int pageNumber, @RequestParam int pageSize){
+    public ResponseEntity<Page<TransactionDTO>> getTransactionPage(@RequestParam int pageNumber,
+            @RequestParam int pageSize) {
         Page<Transaction> transactionPage = transactionService.getTransactionPage(pageNumber, pageSize);
-        Page<JsonNode> jsonNodePage = new PageImpl<>(getTransactionsWithUserNames(transactionPage.getContent()), transactionPage.getPageable(), transactionPage.getTotalElements());
-        return new ResponseEntity<>(jsonNodePage, HttpStatus.OK);
+
+        Page<TransactionDTO> transactionDTOPage = new PageImpl<>(convertToDTOs(transactionPage.getContent()),
+                transactionPage.getPageable(), transactionPage.getTotalElements());
+        return new ResponseEntity<>(transactionDTOPage, HttpStatus.OK);
     }
 
-    private List<JsonNode> getTransactionsWithUserNames(List<Transaction> transactions){
+    private List<Transaction> convertToEntities(List<TransactionDTO> transactionDTOs) {
+        List<Transaction> transactions = new ArrayList<>();
+
+        for (TransactionDTO transactionDTO : transactionDTOs) {
+            Transaction transaction = modelMapper.map(transactionDTO, Transaction.class);
+            transaction.setFromUser(transactionDTO.getFromUser().getId());
+            transaction.setToUser(transactionDTO.getToUser().getId());
+            transactions.add(transaction);
+        }
+
+        return transactions;
+    }
+
+    private List<TransactionDTO> convertToDTOs(List<Transaction> transactions) {
+        List<TransactionDTO> transactionDTOs = new ArrayList<>();
+
         Map<String, NotionUser> notionUsersMap = notionUserService.getNotionUsersAsMap();
 
         NotionUser bankUser = notionUserService.getBankUser();
         notionUsersMap.put(bankUser.getId().toString(), bankUser);
 
-        List<JsonNode> transactionJsonNodeList = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            TransactionDTO transactionDTO = modelMapper.map(transaction, TransactionDTO.class);
 
-        transactions.forEach( transaction -> {
-            ObjectNode transactionJsonNode = new ObjectMapper().createObjectNode();
+            UUID fromUserUUID = transaction.getFromUser();
+            NotionUser fromUser = new NotionUser();
+            if (notionUsersMap.get(fromUserUUID.toString()) == null) {
+                fromUser.setId(fromUserUUID);
+                fromUser.setName(DELETED_NOTION_USER_NAME);
+            } else {
+                fromUser = notionUsersMap.get(fromUserUUID.toString());
+            }
+            transactionDTO.setFromUser(fromUser);
 
-            transactionJsonNode.put("transactionId", transaction.getId());
-            String fromUserUUID = transaction.getFromUser().toString();
-            transactionJsonNode.put("fromUserUuid", fromUserUUID);
-            String fromUserName = notionUsersMap.get(fromUserUUID) == null ? "< DELETED USER >" : notionUsersMap.get(fromUserUUID).getName();
-            transactionJsonNode.put("fromUserName", fromUserName);
-            String toUserUUID = transaction.getToUser().toString();
-            transactionJsonNode.put("toUserUuid", toUserUUID);
-            String toUserName = notionUsersMap.get(toUserUUID) == null ? "< DELETED USER >" : notionUsersMap.get(toUserUUID).getName();
-            transactionJsonNode.put("toUserName", toUserName);
-            transactionJsonNode.putPOJO("product", transaction.getProduct());
-            transactionJsonNode.put("transactionAmount", transaction.getTransactionAmount());
-            transactionJsonNode.put("transactionDate", transaction.getTransactionDate().toString());
-            transactionJsonNode.put("transactionDescription", transaction.getTransactionDescription());
+            UUID toUserUUID = transaction.getToUser();
+            NotionUser toUser = new NotionUser();
+            if (notionUsersMap.get(toUserUUID.toString()) == null) {
+                toUser.setId(toUserUUID);
+                toUser.setName(DELETED_NOTION_USER_NAME);
+            } else {
+                toUser = notionUsersMap.get(toUserUUID.toString());
+            }
+            transactionDTO.setToUser(toUser);
 
-            transactionJsonNodeList.add(transactionJsonNode);
-        });
+            transactionDTOs.add(transactionDTO);
+        }
 
-        return transactionJsonNodeList;
+        return transactionDTOs;
     }
-    
+
 }
