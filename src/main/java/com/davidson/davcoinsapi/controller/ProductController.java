@@ -1,10 +1,15 @@
 package com.davidson.davcoinsapi.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.davidson.davcoinsapi.dto.ProductDTO;
 import com.davidson.davcoinsapi.model.Product;
 import com.davidson.davcoinsapi.service.ProductService;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,52 +28,71 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
-    
+
     private final ProductService productService;
 
+    private final ModelMapper modelMapper;
+
     @PostMapping("/create")
-    public ResponseEntity<Product> createdProduct(@RequestBody ProductDTO productDTO){
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        return new ResponseEntity<>(productService.saveProduct(product), HttpStatus.OK);
+    public ResponseEntity<ProductDTO> createdProduct(@RequestBody ProductDTO productDTO) {
+        Product product = convertToEntity(productDTO);
+        return new ResponseEntity<>(convertToDTO(productService.saveProduct(product)), HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<Product>> getAllProducts(){
-        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+        return new ResponseEntity<>(
+                productService.getAllProducts().stream().map(this::convertToDTO).collect(Collectors.toList()),
+                HttpStatus.OK);
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Page<Product>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize){
-        return new ResponseEntity<>(productService.getProductPage(pageNumber, pageSize), HttpStatus.OK);
+    public ResponseEntity<Page<ProductDTO>> getProductPage(@RequestParam int pageNumber, @RequestParam int pageSize) {
+        Page<Product> productPage = productService.getProductPage(pageNumber, pageSize);
+
+        Page<ProductDTO> productDTOPage = new PageImpl<>(productPage.getContent().stream().map(this::convertToDTO).collect(Collectors.toList()),
+        productPage.getPageable(), productPage.getTotalElements());
+
+        return new ResponseEntity<>(productDTOPage, HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<Product>> getProductSearchPage(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam String query){
-        return new ResponseEntity<>(productService.getProductSearchPage(pageNumber, pageSize, query), HttpStatus.OK);
+    public ResponseEntity<Page<ProductDTO>> getProductSearchPage(@RequestParam int pageNumber, @RequestParam int pageSize,
+            @RequestParam String query) {
+        Page<Product> productPage = productService.getProductSearchPage(pageNumber, pageSize, query);
+
+        Page<ProductDTO> productDTOPage = new PageImpl<>(productPage.getContent().stream().map(this::convertToDTO).collect(Collectors.toList()),
+        productPage.getPageable(), productPage.getTotalElements());
+
+        return new ResponseEntity<>(productDTOPage, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable long id){
-        return new ResponseEntity<>(productService.getProductById(id), HttpStatus.OK);
+    public ResponseEntity<ProductDTO> getProduct(@PathVariable long id) {
+        return new ResponseEntity<>(convertToDTO(productService.getProductById(id)), HttpStatus.OK);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<Product> modifyProduct(@PathVariable long id, @RequestBody ProductDTO productDTO) {
-        Product productToModify = productService.getProductById(id);
+    public ResponseEntity<ProductDTO> modifyProduct(@PathVariable long id, @RequestBody ProductDTO productDTO) {
+        if(id != productDTO.getId().longValue()){
+            throw new IllegalArgumentException("ID's do not match.");
+        }
 
-        productToModify.setName(productDTO.getName());
-        productToModify.setDescription(productDTO.getDescription());
-        productToModify.setPrice(productDTO.getPrice());
+        Product product = convertToEntity(productDTO);
 
-        return new ResponseEntity<>(productService.saveProduct(productToModify), HttpStatus.OK);
+        return new ResponseEntity<>(convertToDTO(productService.saveProduct(product)), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable long id){
+    public void deleteProduct(@PathVariable long id) {
         productService.deleteProductById(id);
+    }
+
+    private ProductDTO convertToDTO(Product product) {
+        return modelMapper.map(product, ProductDTO.class);
+    }
+
+    private Product convertToEntity(ProductDTO productDTO) {
+        return modelMapper.map(productDTO, Product.class);
     }
 }

@@ -1,6 +1,7 @@
 package com.davidson.davcoinsapi.service;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.davidson.davcoinsapi.exception.InvalidProductException;
 import com.davidson.davcoinsapi.exception.ProductNotFoundException;
@@ -22,7 +23,7 @@ public class ProductService {
 
     private final ProductValidator productValidator;
 
-    public Iterable<Product> getAllProducts() {
+    public List<Product> getAllProducts() {
         return productRepository.findAllByOrderByNameAsc();
     }
 

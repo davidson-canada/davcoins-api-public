@@ -1,5 +1,7 @@
 package com.davidson.davcoinsapi.repository;
 
+import java.util.List;
+
 import com.davidson.davcoinsapi.model.Product;
 
 import org.springframework.data.domain.Page;
@@ -9,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductRepository extends PagingAndSortingRepository<Product, Long> {
-    Iterable<Product> findAllByOrderByNameAsc();
+    List<Product> findAllByOrderByNameAsc();
     Page<Product> findAllByOrderByNameAsc(Pageable pageable);
     Page<Product> findAllByNameIgnoreCaseContainingOrderByNameAsc(String name, Pageable pageable);
 }
