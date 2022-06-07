@@ -56,17 +56,29 @@ public class UserBalanceService {
             throw new UserBalanceException("Amount is invalid. amount = " + amount);
         }
 
-        UserBalance userBalance = getUserBalance(id).orElseThrow(() -> new UserNotFoundException("Notion user with UUID " + id.toString() + " does not exist"));
+        if(notionUserService.notionUserExists(id)){
+            Optional<UserBalance> userBalanceOptional = getUserBalance(id);
 
-        if (notionUserService.getBankUser().getId().equals(userBalance.getId())) {
-            throw new UserBalanceException("Cannot modify bank user's balance.");
+            UserBalance userBalance = userBalanceOptional.orElseGet(() -> {
+                UserBalance newUserBalance = new UserBalance();
+                newUserBalance.setId(id);
+                newUserBalance.setBalance(BigDecimal.ZERO);
+                return newUserBalance;
+            });
+    
+            if (notionUserService.getBankUser().getId().equals(userBalance.getId())) {
+                throw new UserBalanceException("Cannot modify bank user's balance.");
+            }
+    
+            userBalance.setBalance(userBalance.getBalance().add(amount));
+    
+            userBalanceValidator.validateUserBalance(userBalance);
+    
+            return userBalanceRepository.save(userBalance);
+
+        } else {
+            throw new UserNotFoundException("Notion user with UUID " + id.toString() + " does not exist");
         }
-
-        userBalance.setBalance(userBalance.getBalance().add(amount));
-
-        userBalanceValidator.validateUserBalance(userBalance);
-
-        return userBalanceRepository.save(userBalance);
     }
 
 }
