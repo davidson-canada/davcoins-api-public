@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +56,16 @@ public class TransactionController {
     public ResponseEntity<Page<TransactionDTO>> getTransactionPage(@RequestParam int pageNumber,
             @RequestParam int pageSize) {
         Page<Transaction> transactionPage = transactionService.getTransactionPage(pageNumber, pageSize);
+
+        Page<TransactionDTO> transactionDTOPage = new PageImpl<>(convertToDTOs(transactionPage.getContent()),
+                transactionPage.getPageable(), transactionPage.getTotalElements());
+        return new ResponseEntity<>(transactionDTOPage, HttpStatus.OK);
+    }
+
+    @GetMapping("/page/by-product/{productId}")
+    public ResponseEntity<Page<TransactionDTO>> getTransactionPage(@PathVariable long productId, @RequestParam int pageNumber,
+            @RequestParam int pageSize) {
+        Page<Transaction> transactionPage = transactionService.getProductTransactionsPage(pageNumber, pageSize, productId);
 
         Page<TransactionDTO> transactionDTOPage = new PageImpl<>(convertToDTOs(transactionPage.getContent()),
                 transactionPage.getPageable(), transactionPage.getTotalElements());

@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.davidson.davcoinsapi.exception.InvalidTransactionException;
 import com.davidson.davcoinsapi.exception.UserBalanceException;
 import com.davidson.davcoinsapi.exception.UserNotFoundException;
+import com.davidson.davcoinsapi.model.Product;
 import com.davidson.davcoinsapi.model.Transaction;
 import com.davidson.davcoinsapi.repository.TransactionRepository;
 
@@ -27,6 +28,8 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
 
     private final UserBalanceService userBalanceService;
+
+    private final ProductService productService;
 
     @Transactional
     public List<Transaction> createTransactions(List<Transaction> transactions)
@@ -61,6 +64,11 @@ public class TransactionService {
 
     public Page<Transaction> getTransactionPage(final int pageNumber, final int pageSize) {
         return transactionRepository.findAllByOrderByTransactionDateDesc(PageRequest.of(pageNumber-1, pageSize));
+    }
+
+    public Page<Transaction> getProductTransactionsPage(final int pageNumber, final int pageSize, final long productId) {
+        Product product = productService.getProductById(productId);
+        return transactionRepository.findAllByProductOrderByTransactionDateDesc(product, PageRequest.of(pageNumber-1, pageSize));
     }
 
     public List<Transaction> getAllMostRecentTransactions() {
